@@ -71,10 +71,9 @@ serve(async (req) => {
 
     // ✅ Clean and format data based on the provided dataset fields
     const formattedData = budgetData.map((item) => ({
-      account: item.account ?? "Unknown",
+      // Using account_budget_a as the primary label for the AI
+      account: item.account_budget_a ?? "Unknown", 
       glcode: item.glcode ?? "Unknown",
-      // Corrected to use account_budget_a as per your request
-      account_budget_a: item.account_budget_a ?? "Unknown",
       allocated: Number(item.budget_a) || 0,
       used: Number(item.used_amt) || 0,
       remaining: Number(item.remaining_amt) || 0,
@@ -98,7 +97,7 @@ SUMMARY OF TOTALS:
 
 DETAILED DATA:
 ${JSON.stringify(formattedData.map(item => ({
-    account: item.account_budget_a,
+    account: item.account,
     allocated: formatNumber(item.allocated),
     used: formatNumber(item.used),
     remaining: formatNumber(item.remaining),
