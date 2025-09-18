@@ -4,13 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, LogOut, Search, BarChart3, Brain } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import SummaryCards from '@/components/budget/SummaryCards';
-import BudgetTable from '@/components/budget/BudgetTable';
-import BudgetChart from '@/components/budget/BudgetChart';
-import AiInsights from '@/components/budget/AiInsights';
-import { CsvImport } from '@/components/budget/CsvImport';
-import DepartmentSelector from '@/components/budget/DepartmentSelector';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import DepartmentSelector from './budget/DepartmentSelector';
+import SummaryCards from './budget/SummaryCards';
+import BudgetTable from './budget/BudgetTable';
+import BudgetChart from './budget/BudgetChart';
+import AiInsights from './budget/AiInsights';
+import { CsvImport } from './budget/CsvImport';
+import { useAuth } from './contexts/AuthContext';
+
 
 interface BudgetItem {
   id: string;
