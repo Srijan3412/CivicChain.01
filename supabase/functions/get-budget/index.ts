@@ -14,8 +14,8 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const { department } = await req.json();
@@ -33,10 +33,10 @@ serve(async (req) => {
       );
     }
 
-    // Fetch budget data using the correct fields
+    // Fetch budget data including the 'account_budget_a' field
     const { data, error } = await supabase
       .from('municipal_budget')
-      .select('id, account, glcode, budget_a, used_amt, remaining_amt')
+      .select('id, account, glcode, account_budget_a, budget_a, used_amt, remaining_amt')
       .eq('account', department)
       .order('used_amt', { ascending: false });
 
