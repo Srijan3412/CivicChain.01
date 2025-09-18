@@ -1,0 +1,10 @@
+project_id = "ruhmttcybwfnlkwkxgso"
+
+[functions.get-budget]
+verify_jwt = false
+
+[functions.get-ai-insights]
+verify_jwt = false
+
+[functions.import-csv]
+verify_jwt = false
