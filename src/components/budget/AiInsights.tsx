@@ -6,11 +6,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface BudgetItem {
-  id: string;
-  category: string;
-  amount: number;
-  ward: number;
-  year: number;
+  account: string;
+  glcode: string;
+  budget_a: number;
+  used_amt: number;
+  remaining_amt: number;
 }
 
 interface AiInsightsProps {
@@ -36,11 +36,20 @@ const AiInsights: React.FC<AiInsightsProps> = ({ budgetData, department }) => {
     setLoading(true);
     
     try {
+      // Create the payload with the correct structure and key names
+      const payload = {
+        department: department,
+        budgetData: budgetData.map(item => ({
+          account: item.account,
+          glcode: item.glcode,
+          budget_a: item.budget_a,
+          used_amt: item.used_amt,
+          remaining_amt: item.remaining_amt,
+        })),
+      };
+
       const { data, error } = await supabase.functions.invoke('get-ai-insights', {
-        body: {
-          budgetData,
-          department
-        }
+        body: payload,
       });
 
       if (error) {
