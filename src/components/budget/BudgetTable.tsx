@@ -10,15 +10,12 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-// Corrected BudgetItem interface to match the database schema
 interface BudgetItem {
   id: string;
-  account: string;
-  glcode: string;
-  budget_a: number;
-  used_amt: number;
-  remaining_amt: number;
-  account_budget_a: string;
+  category: string;
+  amount: number;
+  ward: number;
+  year: number;
 }
 
 interface BudgetTableProps {
@@ -35,7 +32,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({ budgetData, department }) => 
     }).format(amount);
   };
 
-  const totalUsedAmount = budgetData.reduce((sum, item) => sum + Number(item.used_amt), 0);
+  const totalBudget = budgetData.reduce((sum, item) => sum + Number(item.amount), 0);
 
   return (
     <Card>
@@ -56,15 +53,11 @@ const BudgetTable: React.FC<BudgetTableProps> = ({ budgetData, department }) => 
           </TableHeader>
           <TableBody>
             {budgetData.map((item) => {
-              const percentage = totalUsedAmount > 0 
-                ? ((Number(item.used_amt) / totalUsedAmount) * 100).toFixed(1) 
-                : '0';
+              const percentage = ((Number(item.amount) / totalBudget) * 100).toFixed(1);
               return (
                 <TableRow key={item.id}>
-                  {/* Correctly using 'account_budget_a' for the category display */}
-                  <TableCell className="font-medium">{item.account_budget_a}</TableCell>
-                  {/* Correctly using 'used_amt' for the amount display */}
-                  <TableCell className="text-right">{formatCurrency(Number(item.used_amt))}</TableCell>
+                  <TableCell className="font-medium">{item.category}</TableCell>
+                  <TableCell className="text-right">{formatCurrency(Number(item.amount))}</TableCell>
                   <TableCell className="text-right">{percentage}%</TableCell>
                 </TableRow>
               );
