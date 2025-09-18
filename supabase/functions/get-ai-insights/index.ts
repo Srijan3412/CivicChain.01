@@ -59,6 +59,8 @@ serve(async (req) => {
     const formattedData = budgetData.map((item) => ({
       account: item.account ?? "Unknown",
       glcode: item.glcode ?? "Unknown",
+      // Corrected to use account_budget_a as per your request
+      account_budget_a: item.account_budget_a ?? "Unknown",
       allocated: Number(item.budget_a) || 0,
       used: Number(item.used_amt) || 0,
       remaining: Number(item.remaining_amt) || 0,
