@@ -19,12 +19,10 @@ const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accen
 
 const BudgetChart: React.FC<BudgetChartProps> = ({ budgetData }) => {
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-    }).format(value);
-  };
+  return new Intl.NumberFormat('en-IN', {
+    maximumFractionDigits: 0,
+  }).format(value);
+};
 
   const chartData = budgetData.map((item) => ({
     category: item.category,

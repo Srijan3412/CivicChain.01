@@ -15,12 +15,15 @@ interface SummaryCardsProps {
 
 const SummaryCards: React.FC<SummaryCardsProps> = ({ summary }) => {
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
+  return new Intl.NumberFormat('en-IN', {
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
+
+
+
+
 
   const isPositiveChange = summary.yearOverYearChange >= 0;
 
