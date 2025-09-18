@@ -7,6 +7,20 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS"
 };
 
+// Helper function to format large numbers
+const formatNumber = (num) => {
+  if (num >= 10000000) {
+    return `${(num / 10000000).toFixed(2)} Crore`;
+  }
+  if (num >= 100000) {
+    return `${(num / 100000).toFixed(2)} Lakh`;
+  }
+  if (num >= 1000) {
+    return `${(num / 1000).toFixed(2)} Thousand`;
+  }
+  return num.toLocaleString();
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
@@ -78,12 +92,18 @@ You are a financial analyst AI.
 Your job is to summarize the budget data for the department: "${department}".
 
 SUMMARY OF TOTALS:
-- Total Allocated: ${totalAllocated.toLocaleString()}
-- Total Used: ${totalUsed.toLocaleString()}
-- Total Remaining: ${totalRemaining.toLocaleString()}
+- Total Allocated: ${formatNumber(totalAllocated)}
+- Total Used: ${formatNumber(totalUsed)}
+- Total Remaining: ${formatNumber(totalRemaining)}
 
 DETAILED DATA:
-${JSON.stringify(formattedData, null, 2)}
+${JSON.stringify(formattedData.map(item => ({
+    account: item.account_budget_a,
+    allocated: formatNumber(item.allocated),
+    used: formatNumber(item.used),
+    remaining: formatNumber(item.remaining),
+    used_percent: item.used_percent,
+  })), null, 2)}
 
 TASK:
 1. Write a short, clear summary of this department's financials:
