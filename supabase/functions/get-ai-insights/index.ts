@@ -86,7 +86,7 @@ serve(async (req) => {
     const totalUsed = formattedData.reduce((sum, b) => sum + b.used, 0);
     const totalRemaining = formattedData.reduce((sum, b) => sum + b.remaining, 0);
 
-    // ✅ Gemini-friendly prompt
+    // ✅ Simplified Gemini-friendly prompt
     const prompt = `
 You are a financial analyst AI.
 Your job is to summarize the budget data for the department: "${department}".
@@ -98,25 +98,22 @@ SUMMARY OF TOTALS:
 
 DETAILED DATA:
 ${JSON.stringify(formattedData.map(item => ({
-    account: item.account,
-    glcode: item.glcode,
-    account_description: item.account_budget_a,
+    account_name: item.account_budget_a,
     allocated: formatNumber(item.allocated),
-    used: formatNumber(item.used),
-    remaining: formatNumber(item.remaining),
-    used_percent: item.used_percent,
+    spent: formatNumber(item.used),
+    left: formatNumber(item.remaining),
   })), null, 2)}
 
 TASK:
-Write a simple summary for a citizen. It should be short, clear, and easy to read.
+Write a short, clear report for a citizen.
 
-Your summary should:
-- Give a quick overview of the total budget and how much was spent.
-- Mention which accounts spent the most money.
-- Point out any accounts where a lot of money was not spent.
-- Give one simple idea for how the department could improve.
+Your report should:
+- Start with a single sentence summarizing the overall budget.
+- Use bullet points to list the top 3 spending areas.
+- Mention any major unspent funds or overspending as a key takeaway.
+- Finish with one simple suggestion on how the department could improve its financial planning.
 
-Do not use technical terms.
+Keep it under 8 sentences and use everyday language. Do not use financial jargon like "glcode" or "allocated."
 `;
     console.log("📤 Sending to Gemini API...");
     console.log("📝 Prompt length:", prompt.length);
