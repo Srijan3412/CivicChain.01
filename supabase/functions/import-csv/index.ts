@@ -4,7 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 serve(async (req) => {
@@ -23,42 +23,56 @@ serve(async (req) => {
     if (!csvFile) {
       return new Response(JSON.stringify({ error: "No CSV file provided" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Read CSV
+    // Read file content
     const csvContent = await csvFile.text();
     const lines = csvContent.trim().split("\n");
-    const headers = lines[0].split("\t").map((h) => h.trim().toLowerCase());
+
+    // Detect delimiter automatically (CSV or TSV)
+    let delimiter = "\t";
+    if (lines[0].includes(",")) delimiter = ",";
+
+    const headers = lines[0].split(delimiter).map((h) => h.trim().toLowerCase());
+    console.log("Detected delimiter:", delimiter);
     console.log("CSV headers:", headers);
 
-    // Expect columns that match your DB schema
-    const requiredColumns = ["account", "glcode", "account_budget_a", "budget_a", "used_amt", "remaining_amt"];
-    const missingColumns = requiredColumns.filter(col => !headers.includes(col));
+    // ✅ Required columns matching your Supabase schema
+    const requiredColumns = [
+      "account",
+      "glcode",
+      "account_budget_a",
+      "budget_a",
+      "used_amt",
+      "remaining_amt",
+    ];
 
+    const missingColumns = requiredColumns.filter((col) => !headers.includes(col));
     if (missingColumns.length > 0) {
-      return new Response(JSON.stringify({
-        error: `Missing required columns: ${missingColumns.join(", ")}`
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
+      return new Response(
+        JSON.stringify({ error: `Missing required columns: ${missingColumns.join(", ")}` }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // Parse rows
     const budgetData: any[] = [];
     for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split("\t").map((v) => v.trim());
+      const values = lines[i].split(delimiter).map((v) => v.trim());
       if (values.length === headers.length) {
         const row: any = {};
         headers.forEach((header, index) => {
           if (header === "account") row.account = values[index];
           if (header === "glcode") row.glcode = values[index];
-          if (header === "account_budget_a") row.account_budget_a = values[index]; // TEXT
-          if (header === "budget_a") row.budget_a = parseFloat(values[index].replace(/[$,]/g, "")) || 0; // NUMERIC
-          if (header === "used_amt") row.used_amt = parseFloat(values[index].replace(/[$,]/g, "")) || 0;
-          if (header === "remaining_amt") row.remaining_amt = parseFloat(values[index].replace(/[$,]/g, "")) || 0;
+          if (header === "account_budget_a") row.account_budget_a = values[index];
+          if (header === "budget_a")
+            row.budget_a = parseFloat(values[index].replace(/[$,]/g, "")) || 0;
+          if (header === "used_amt")
+            row.used_amt = parseFloat(values[index].replace(/[$,]/g, "")) || 0;
+          if (header === "remaining_amt")
+            row.remaining_amt = parseFloat(values[index].replace(/[$,]/g, "")) || 0;
         });
 
         if (row.account && row.glcode) {
@@ -68,47 +82,50 @@ serve(async (req) => {
     }
 
     console.log(`Parsed ${budgetData.length} budget records`);
+    console.log("Sample row:", budgetData[0]);
 
     if (budgetData.length === 0) {
       return new Response(JSON.stringify({ error: "No valid rows found in CSV" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // 🧹 Clear the table before inserting
-    const { error: deleteError } = await supabase.from("municipal_budget").delete().neq("id", "");
+    // 🧹 Clear table before inserting
+    const { error: deleteError } = await supabase
+      .from("municipal_budget")
+      .delete()
+      .neq("id", "");
     if (deleteError) {
       console.error("Error clearing table:", deleteError);
-      return new Response(JSON.stringify({ error: "Failed to clear table", details: deleteError }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
+      return new Response(
+        JSON.stringify({ error: "Failed to clear table", details: deleteError }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    // Insert data
-    const { data, error } = await supabase.from("municipal_budget").insert(budgetData);
-
+    // ✅ Insert data into Supabase
+    const { error } = await supabase.from("municipal_budget").insert(budgetData);
     if (error) {
       console.error("Error inserting data:", error);
-      return new Response(JSON.stringify({ error: "Failed to insert budget data", details: error }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
+      return new Response(
+        JSON.stringify({ error: "Failed to insert budget data", details: error }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    return new Response(JSON.stringify({
-      message: `Successfully imported ${budgetData.length} budget records`,
-      recordsImported: budgetData.length
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
-    });
-
-  } catch (error) {
-    console.error("Error in import-csv function:", error);
+    return new Response(
+      JSON.stringify({
+        message: `Successfully imported ${budgetData.length} budget records`,
+        recordsImported: budgetData.length,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (err) {
+    console.error("Error in import-csv function:", err);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
