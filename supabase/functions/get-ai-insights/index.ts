@@ -108,12 +108,15 @@ ${JSON.stringify(formattedData.map(item => ({
   })), null, 2)}
 
 TASK:
-1. Provide a concise, easy-to-read summary of the department's spending.
-2. Highlight the most significant spending areas (the top 3 accounts by amount spent).
-3. Point out any surprising things in the data, like a lot of money not spent or money being overspent.
-4. Offer one simple, actionable idea for how the department could handle its money better.
+Write a simple summary for a citizen. It should be short, clear, and easy to read.
 
-Your response should be short (around 5-8 sentences), clear, and should not use complex financial terms.
+Your summary should:
+- Give a quick overview of the total budget and how much was spent.
+- Mention which accounts spent the most money.
+- Point out any accounts where a lot of money was not spent.
+- Give one simple idea for how the department could improve.
+
+Do not use technical terms.
 `;
     console.log("📤 Sending to Gemini API...");
     console.log("📝 Prompt length:", prompt.length);
