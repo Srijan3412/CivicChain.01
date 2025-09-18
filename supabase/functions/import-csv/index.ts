@@ -34,7 +34,7 @@ serve(async (req) => {
     console.log("CSV headers:", headers);
 
     // Expect columns that match your DB schema
-    const requiredColumns = ["account", "glcode", "account_budget_a", "used_amt", "remaining_amt"];
+    const requiredColumns = ["account", "glcode", "account_budget_a", "budget_a", "used_amt", "remaining_amt"];
     const missingColumns = requiredColumns.filter(col => !headers.includes(col));
 
     if (missingColumns.length > 0) {
@@ -55,7 +55,8 @@ serve(async (req) => {
         headers.forEach((header, index) => {
           if (header === "account") row.account = values[index];
           if (header === "glcode") row.glcode = values[index];
-          if (header === "account_budget_a") row.account_budget_a = values[index]; // ✅ correct column
+          if (header === "account_budget_a") row.account_budget_a = values[index]; // TEXT
+          if (header === "budget_a") row.budget_a = parseFloat(values[index].replace(/[$,]/g, "")) || 0; // NUMERIC
           if (header === "used_amt") row.used_amt = parseFloat(values[index].replace(/[$,]/g, "")) || 0;
           if (header === "remaining_amt") row.remaining_amt = parseFloat(values[index].replace(/[$,]/g, "")) || 0;
         });
@@ -85,6 +86,7 @@ serve(async (req) => {
       });
     }
 
+    // Insert data
     const { data, error } = await supabase.from("municipal_budget").insert(budgetData);
 
     if (error) {
