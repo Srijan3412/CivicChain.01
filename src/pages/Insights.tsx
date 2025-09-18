@@ -30,12 +30,14 @@ const DepartmentSelector = ({ value, onChange }) => {
 };
 
 
+// Corrected BudgetItem interface to match the database schema
 interface BudgetItem {
   id: string;
-  category: string;
-  amount: number;
-  ward: number;
-  year: number;
+  account: string;
+  glcode: string;
+  budget_a: number;
+  used_amt: number;
+  remaining_amt: number;
 }
 
 const Insights = () => {
@@ -63,6 +65,8 @@ const Insights = () => {
     setFetchingData(true);
     
     try {
+      // Assuming 'get-budget' edge function is correct and returns data
+      // with the keys defined in the BudgetItem interface above.
       const { data, error } = await supabase.functions.invoke('get-budget', {
         body: { department }
       });
@@ -100,7 +104,8 @@ const Insights = () => {
     setLoading(true);
     
     try {
-      // Create the payload with the correct structure and key names that match the Deno function
+      // Create the payload with the correct structure and key names
+      // The payload now correctly maps to the Deno function's expectations
       const payload = {
         department: department,
         budgetData: budgetData.map(item => ({

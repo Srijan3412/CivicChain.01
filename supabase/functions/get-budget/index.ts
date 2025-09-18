@@ -33,10 +33,10 @@ serve(async (req) => {
       );
     }
 
-    // Fetch budget data
-    const { data: budgetData, error } = await supabase
+    // Fetch budget data using the correct fields
+    const { data, error } = await supabase
       .from('municipal_budget')
-      .select('*')
+      .select('id, account, glcode, budget_a, used_amt, remaining_amt')
       .eq('account', department)
       .order('used_amt', { ascending: false });
 
@@ -50,30 +50,12 @@ serve(async (req) => {
         }
       );
     }
-
-    // Transform data to match expected format
-    const transformedData = budgetData?.map(item => ({
-      id: item.id,
-      category: item.glcode || 'Unknown Category',
-      amount: Number(item.used_amt || 0),
-      ward: 0, // Not used anymore but kept for compatibility
-      year: new Date().getFullYear() // Default to current year
-    })) || [];
-
-    // Calculate summary statistics
-    const totalBudget = transformedData.reduce((sum, item) => sum + item.amount, 0);
-    const largestItem = transformedData[0]; // Already sorted by used_amt desc
+    
+    // The data is now correctly structured from the database
+    const transformedData = data || [];
 
     const response = {
       budgetData: transformedData,
-      summary: {
-        totalBudget,
-        largestCategory: largestItem ? {
-          category: largestItem.category,
-          amount: largestItem.amount
-        } : null,
-        yearOverYearChange: 0 // TODO: Calculate when we have historical data
-      }
     };
 
     return new Response(JSON.stringify(response), {
