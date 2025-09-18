@@ -108,25 +108,12 @@ ${JSON.stringify(formattedData.map(item => ({
   })), null, 2)}
 
 TASK:
-1. Write a short, clear summary of this department's financials:
-   - Total allocated budget, total spent, total remaining.
-   - Top 3 accounts by amount spent (include name and amount).
-   - If there are major unspent funds, call that out.
-2. Identify anomalies such as:
-   - Spending higher than allocation.
-   - Very low usage (less than 20% of allocation).
-3. Provide ONE practical suggestion for this department to optimize or better plan its spending.
-4. Make it concise (5–8 sentences max), easy to read, and formatted as a brief report.
+1. Provide a concise, easy-to-read summary of the department's spending.
+2. Highlight the most significant spending areas (the top 3 accounts by amount spent).
+3. Point out any surprising things in the data, like a lot of money not spent or money being overspent.
+4. Offer one simple, actionable idea for how the department could handle its money better.
 
-OUTPUT FORMAT:
-- Start with a **one-sentence overview** (big picture).
-- Then list 2–3 key insights as bullet points.
-- End with a single actionable recommendation.
-
-IMPORTANT:
-- Always use the provided numbers — do not say "unknown" or "no data".
-- If some accounts have zero usage, mention that as a potential saving or opportunity.
-- Your answer must be written in plain English for citizens, not accountants.
+Your response should be short (around 5-8 sentences), clear, and should not use complex financial terms.
 `;
     console.log("📤 Sending to Gemini API...");
     console.log("📝 Prompt length:", prompt.length);
