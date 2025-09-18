@@ -30,14 +30,12 @@ serve(async (req) => {
     // Read CSV
     const csvContent = await csvFile.text();
     const lines = csvContent.trim().split('\n');
-    const headers = lines[0].split(',').map((h) => h.trim().toLowerCase());
+    const headers = lines[0].split('\t').map((h) => h.trim().toLowerCase());
     console.log('CSV headers:', headers);
 
-    // Accept 'budget_a' column and map it to account_budget_a
-    const requiredColumns = ['account', 'glcode', 'budget_a', 'used_amt', 'remaining_amt'];
-    const missingColumns = requiredColumns.filter(
-      (col) => !headers.some((h) => h === col)
-    );
+    // Expect all 5 columns to be present
+    const requiredColumns = ['account', 'glcode', 'account_budget', 'budget_a', 'used_amt', 'remaining_amt'];
+    const missingColumns = requiredColumns.filter(col => !headers.includes(col));
 
     if (missingColumns.length > 0) {
       return new Response(JSON.stringify({
@@ -48,15 +46,17 @@ serve(async (req) => {
       });
     }
 
-    const budgetData = [];
+    // Parse rows
+    const budgetData: any[] = [];
     for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(',').map((v) => v.trim());
+      const values = lines[i].split('\t').map((v) => v.trim());
       if (values.length === headers.length) {
-        const row = {};
+        const row: any = {};
         headers.forEach((header, index) => {
           if (header === 'account') row.account = values[index];
           if (header === 'glcode') row.glcode = values[index];
-          if (header === 'budget_a') row.account_budget_a = parseFloat(values[index].replace(/[$,]/g, '')) || 0;
+          if (header === 'account_budget') row.account_budget = values[index]; // keep as TEXT
+          if (header === 'budget_a') row.budget_a = values[index]; // keep as TEXT
           if (header === 'used_amt') row.used_amt = parseFloat(values[index].replace(/[$,]/g, '')) || 0;
           if (header === 'remaining_amt') row.remaining_amt = parseFloat(values[index].replace(/[$,]/g, '')) || 0;
         });
@@ -76,11 +76,21 @@ serve(async (req) => {
       });
     }
 
+    // 🧹 Clear the table before inserting
+    const { error: deleteError } = await supabase.from("municipal_budget").delete().neq("id", 0);
+    if (deleteError) {
+      console.error("Error clearing table:", deleteError);
+      return new Response(JSON.stringify({ error: "Failed to clear table", details: deleteError }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
     const { data, error } = await supabase.from('municipal_budget').insert(budgetData);
 
     if (error) {
       console.error('Error inserting data:', error);
-      return new Response(JSON.stringify({ error: 'Failed to insert budget data' }), {
+      return new Response(JSON.stringify({ error: 'Failed to insert budget data', details: error }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
