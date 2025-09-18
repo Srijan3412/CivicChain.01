@@ -25,11 +25,12 @@ interface BudgetTableProps {
 
 const BudgetTable: React.FC<BudgetTableProps> = ({ budgetData, department }) => {
   const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-IN', {
-    maximumFractionDigits: 0,
-  }).format(amount);
-};
-
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
 
   const totalBudget = budgetData.reduce((sum, item) => sum + Number(item.amount), 0);
 

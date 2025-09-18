@@ -15,12 +15,12 @@ interface SummaryCardsProps {
 
 const SummaryCards: React.FC<SummaryCardsProps> = ({ summary }) => {
   const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-IN', {
-    maximumFractionDigits: 0,
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
   }).format(amount);
 };
-
-
 
 
 
