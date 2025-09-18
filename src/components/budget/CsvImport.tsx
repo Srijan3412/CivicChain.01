@@ -39,16 +39,14 @@ export const CsvImport: React.FC = () => {
         body: formData,
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       setUploadStatus('success');
       toast({
         title: "Import Successful",
         description: `${data.recordsImported} budget records imported successfully.`,
       });
-      
+
       // Reset file selection
       setSelectedFile(null);
       const fileInput = document.getElementById('csv-file-input') as HTMLInputElement;
@@ -77,7 +75,8 @@ export const CsvImport: React.FC = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="text-sm text-muted-foreground">
-          Upload a CSV file with columns: Ward, Year, Category, Amount
+          Upload a CSV file with the following columns: 
+          <strong> ACCOUNT, GLCODE, ACCOUNT BUDGET A, USED AMT, REMAINING AMT </strong>
         </div>
         
         <div className="flex items-center gap-4">
@@ -125,9 +124,9 @@ export const CsvImport: React.FC = () => {
         <div className="text-xs text-muted-foreground">
           <p><strong>Expected CSV format:</strong></p>
           <code className="block mt-1 p-2 bg-muted rounded text-xs">
-            Ward,Year,Category,Amount<br/>
-            1,2023,Infrastructure,500000<br/>
-            1,2023,Education,750000
+            ACCOUNT,GLCODE,ACCOUNT BUDGET A,USED AMT,REMAINING AMT<br/>
+            GENERAL,A20100112,70000000,62495338,7504662<br/>
+            GENERAL,A20100111,1000000,699193,300807
           </code>
         </div>
       </CardContent>
