@@ -13,13 +13,14 @@ export const CsvImport: React.FC = () => {
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type === 'text/csv') {
+    // ✅ accept CSV + TSV (because we split by tab on backend)
+    if (file && (file.type === 'text/csv' || file.name.endsWith('.csv') || file.name.endsWith('.tsv'))) {
       setSelectedFile(file);
       setUploadStatus('idle');
     } else {
       toast({
         title: "Invalid File",
-        description: "Please select a valid CSV file.",
+        description: "Please select a valid CSV or TSV file.",
         variant: "destructive",
       });
     }
@@ -47,7 +48,6 @@ export const CsvImport: React.FC = () => {
         description: `${data.recordsImported} budget records imported successfully.`,
       });
 
-      // Reset file selection
       setSelectedFile(null);
       const fileInput = document.getElementById('csv-file-input') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
@@ -75,8 +75,8 @@ export const CsvImport: React.FC = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="text-sm text-muted-foreground">
-          Upload a CSV file with the following columns: 
-          <strong> ACCOUNT, GLCODE, ACCOUNT BUDGET A, USED AMT, REMAINING AMT </strong>
+          Upload a CSV/TSV file with the following columns: 
+          <strong> ACCOUNT, GLCODE, ACCOUNT BUDGET A, BUDGET A, USED AMT, REMAINING AMT </strong>
         </div>
         
         <div className="flex items-center gap-4">
@@ -84,7 +84,7 @@ export const CsvImport: React.FC = () => {
             <input
               id="csv-file-input"
               type="file"
-              accept=".csv"
+              accept=".csv,.tsv,text/csv,text/tab-separated-values"
               onChange={handleFileSelect}
               className="hidden"
             />
@@ -124,9 +124,9 @@ export const CsvImport: React.FC = () => {
         <div className="text-xs text-muted-foreground">
           <p><strong>Expected CSV format:</strong></p>
           <code className="block mt-1 p-2 bg-muted rounded text-xs">
-            ACCOUNT,GLCODE,ACCOUNT BUDGET A,USED AMT,REMAINING AMT<br/>
-            GENERAL,A20100112,70000000,62495338,7504662<br/>
-            GENERAL,A20100111,1000000,699193,300807
+            ACCOUNT,GLCODE,ACCOUNT BUDGET A,BUDGET A,USED AMT,REMAINING AMT<br/>
+            GENERAL,A20100112,70000000,70000000,62495338,7504662<br/>
+            GENERAL,A20100111,1000000,1000000,699193,300807
           </code>
         </div>
       </CardContent>
