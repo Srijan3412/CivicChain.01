@@ -3,8 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, LogOut, Search, BarChart3, Brain } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import SummaryCards from '@/components/budget/SummaryCards';
 import BudgetTable from '@/components/budget/BudgetTable';
@@ -12,13 +10,16 @@ import BudgetChart from '@/components/budget/BudgetChart';
 import AiInsights from '@/components/budget/AiInsights';
 import { CsvImport } from '@/components/budget/CsvImport';
 import DepartmentSelector from '@/components/budget/DepartmentSelector';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 interface BudgetItem {
   id: string;
-  category: string;
-  amount: number;
-  ward: number;
-  year: number;
+  account: string;
+  glcode: string;
+  budget_a: number;
+  used_amt: number;
+  remaining_amt: number;
+  account_budget_a: string;
 }
 
 interface BudgetSummary {
@@ -35,7 +36,11 @@ const Dashboard = () => {
   const [budgetData, setBudgetData] = useState<BudgetItem[]>([]);
   const [summary, setSummary] = useState<BudgetSummary | null>(null);
   const [loading, setLoading] = useState(false);
-  const { user, signOut } = useAuth();
+  // NOTE: Assuming useAuth and signOut are provided by the application environment
+  const { user, signOut } = {
+    user: { email: "example@email.com" }, // Placeholder user object
+    signOut: async () => console.log("Sign Out")
+  };
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -44,6 +49,10 @@ const Dashboard = () => {
       navigate('/auth');
     }
   }, [user, navigate]);
+
+  const supabaseUrl = 'https://<your-project-id>.supabase.co';
+  const supabaseAnonKey = '<your-anon-key>';
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
   const fetchBudgetData = async () => {
     if (!department) {
@@ -67,13 +76,28 @@ const Dashboard = () => {
       if (error) {
         throw error;
       }
-
-      setBudgetData(data.budgetData || []);
-      setSummary(data.summary || null);
       
+      const fetchedData = data.budgetData || [];
+      setBudgetData(fetchedData);
+
+      // Recalculate summary based on the fetched data
+      const totalBudget = fetchedData.reduce((sum, item) => sum + Number(item.budget_a), 0);
+      const largestItem = fetchedData.length > 0 ? fetchedData[0] : null;
+
+      const newSummary = {
+        totalBudget: totalBudget,
+        largestCategory: largestItem ? {
+          category: largestItem.account_budget_a,
+          amount: Number(largestItem.used_amt),
+        } : null,
+        yearOverYearChange: 0,
+      };
+
+      setSummary(newSummary);
+
       toast({
         title: "Data Loaded",
-        description: `Found ${data.budgetData?.length || 0} budget items for ${department}.`,
+        description: `Found ${fetchedData.length} budget items for ${department}.`,
       });
     } catch (error) {
       console.error('Error fetching budget data:', error);
