@@ -71,9 +71,10 @@ serve(async (req) => {
 
     // ✅ Clean and format data based on the provided dataset fields
     const formattedData = budgetData.map((item) => ({
-      // Using account_budget_a as the primary label for the AI
-      account: item.account_budget_a ?? "Unknown", 
+      // Using 'account' for the primary label as it's present in the frontend payload
+      account: item.account ?? "Unknown", 
       glcode: item.glcode ?? "Unknown",
+      account_budget_a: item.account_budget_a ?? "Unknown",
       allocated: Number(item.budget_a) || 0,
       used: Number(item.used_amt) || 0,
       remaining: Number(item.remaining_amt) || 0,
@@ -98,6 +99,8 @@ SUMMARY OF TOTALS:
 DETAILED DATA:
 ${JSON.stringify(formattedData.map(item => ({
     account: item.account,
+    glcode: item.glcode,
+    account_description: item.account_budget_a,
     allocated: formatNumber(item.allocated),
     used: formatNumber(item.used),
     remaining: formatNumber(item.remaining),
@@ -189,8 +192,7 @@ IMPORTANT:
   } catch (error) {
     console.error("💥 Edge Function Error:", error);
     return new Response(JSON.stringify({
-      error: "Internal server error",
-      details: String(error)
+      error: "Internal server error"
     }), {
       status: 500,
       headers: {
